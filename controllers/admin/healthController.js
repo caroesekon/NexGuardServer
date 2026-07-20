@@ -35,23 +35,14 @@ const getHealth = asyncHandler(async (req, res) => {
     memoryUsed: null,
   };
 
+  // Check Rust API via HTTP health endpoint
   try {
     const axios = require('axios');
-    const baseUrl = process.env.APP_URL || `http://localhost:${process.env.PORT || 5000}`;
-    const response = await axios.get(`${baseUrl}/api/public/v1/engine/health`, {
-      timeout: 5000,
-    });
-    const health = response.data.data;
-
-    const uptimeSecs = parseInt(health.uptime_seconds) || 0;
-
+    const rustApiUrl = process.env.RUST_API_URL || 'https://nexguardapi-gz13.onrender.com';
+    await axios.get(`${rustApiUrl}/`, { timeout: 5000 });
     api.status = 'running';
-    api.uptime = uptimeSecs;
-    api.uptimeFormatted = formatUptime(uptimeSecs);
-    api.version = health.engine_version || 'unknown';
-    api.rustVersion = health.rust_version || 'unknown';
-    api.platform = health.platform || 'unknown';
-    api.memoryUsed = health.memory_used ? formatBytes(health.memory_used) : 'unknown';
+    api.version = '0.1.0';
+    api.platform = 'linux';
   } catch (err) {
     api.status = 'unreachable';
     api.error = err.message;
