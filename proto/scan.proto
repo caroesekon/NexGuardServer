@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package nexguard;
+
+import "common.proto";
+
+service ScanEngine {
+  rpc ScanFile(ScanFileRequest) returns (ScanFileResponse);
+  rpc MatchHash(MatchHashRequest) returns (MatchHashResponse);
+  rpc RunYara(YaraRequest) returns (YaraResponse);
+  rpc AnalyzeProcess(ProcessAnalysisRequest) returns (ProcessAnalysisResponse);
+}
+
+message ScanFileRequest {
+  bytes file_content = 1;
+  string file_name = 2;
+  string file_path = 3;
+  SignatureDB signature_db = 4;
+  repeated bytes compiled_yara_rules = 5;
+  HeuristicConfig heuristic_config = 6;
+  ScanOptions options = 7;
+}
+
+message ScanFileResponse {
+  string scan_id = 1;
+  bool threat_detected = 2;
+  ThreatInfo threat = 3;
+  ScanMetadata metadata = 4;
+}
+
+message MatchHashRequest {
+  string hash = 1;
+  SignatureDB signature_db = 2;
+}
+
+message MatchHashResponse {
+  bool matched = 1;
+  ThreatInfo threat = 2;
+}
+
+message YaraRequest {
+  bytes file_content = 1;
+  repeated bytes compiled_rules = 2;
+  int32 timeout_ms = 3;
+}
+
+message YaraResponse {
+  bool matched = 1;
+  repeated string matched_rules = 2;
+  ScanMetadata metadata = 3;
+}
+
+message ProcessAnalysisRequest {
+  bytes memory_dump = 1;
+  int32 process_id = 2;
+  string process_name = 3;
+  repeated bytes compiled_yara_rules = 4;
+}
+
+message ProcessAnalysisResponse {
+  bool threat_detected = 1;
+  repeated ThreatInfo threats = 2;
+  ScanMetadata metadata = 3;
+}

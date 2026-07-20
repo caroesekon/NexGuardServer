@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package nexguard;
+
+service VpnEngine {
+  rpc GenerateKeypair(GenerateKeypairRequest) returns (GenerateKeypairResponse);
+  rpc GenerateClientConfig(ClientConfigRequest) returns (ClientConfigResponse);
+  rpc GenerateGatewayConfig(GatewayConfigRequest) returns (GatewayConfigResponse);
+  rpc CalculateBandwidth(BandwidthRequest) returns (BandwidthResponse);
+}
+
+message GenerateKeypairRequest {}
+
+message GenerateKeypairResponse {
+  string private_key = 1;
+  string public_key = 2;
+}
+
+message ClientConfigRequest {
+  string client_private_key = 1;
+  string gateway_public_key = 2;
+  string gateway_endpoint = 3;
+  int32 gateway_port = 4;
+  string assigned_ip = 5;
+  repeated string dns_servers = 6;
+  repeated string allowed_ips = 7;
+  bool kill_switch = 8;
+}
+
+message ClientConfigResponse {
+  string wireguard_config = 1;
+  string interface_name = 2;
+}
+
+message GatewayConfigRequest {
+  string gateway_private_key = 1;
+  string client_public_key = 2;
+  string client_assigned_ip = 3;
+  int32 listen_port = 4;
+}
+
+message GatewayConfigResponse {
+  string peer_config = 1;
+}
+
+message BandwidthRequest {
+  int64 bytes_up = 1;
+  int64 bytes_down = 2;
+  int64 duration_seconds = 3;
+}
+
+message BandwidthResponse {
+  double avg_upload_kbps = 1;
+  double avg_download_kbps = 2;
+  int64 total_bytes = 3;
+  double estimated_hourly_gb = 4;
+}

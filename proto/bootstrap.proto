@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package nexguard;
+
+import "common.proto";
+
+service BootstrapService {
+  rpc Bootstrap(BootstrapRequest) returns (BootstrapResponse);
+  rpc UpdateRules(UpdateRulesRequest) returns (UpdateRulesResponse);
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message BootstrapRequest {
+  string engine_id = 1;
+  string engine_version = 2;
+  string cached_yara_version = 3;
+  string cached_sig_version = 4;
+}
+
+message BootstrapResponse {
+  YaraPayload yara_rules = 1;
+  SignaturePayload signature_db = 2;
+  HeuristicConfig heuristic_rules = 3;
+  RuntimeConfig config = 4;
+}
+
+message YaraPayload {
+  string version = 1;
+  repeated bytes compiled = 2;
+  bool cache_current = 3;
+}
+
+message SignaturePayload {
+  string version = 1;
+  SignatureDB database = 2;
+  bool cache_current = 3;
+}
+
+message RuntimeConfig {
+  int32 max_file_size_mb = 1;
+  int32 scan_timeout_ms = 2;
+  bool enable_heuristic_ai = 3;
+}
+
+message UpdateRulesRequest {
+  YaraPayload yara_rules = 1;
+  SignaturePayload signature_db = 2;
+}
+
+message UpdateRulesResponse {
+  bool success = 1;
+  string new_version = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  bool healthy = 1;
+  string engine_version = 2;
+  string yara_version = 3;
+  string sig_version = 4;
+  int64 uptime_seconds = 5;
+  string rust_version = 6;
+  string platform = 7;
+  uint64 memory_used = 8;
+}

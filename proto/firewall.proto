@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package nexguard;
+
+service FirewallEngine {
+  rpc EvaluateConnection(EvaluateRequest) returns (EvaluateResponse);
+  rpc CompileRules(CompileRulesRequest) returns (CompileRulesResponse);
+  rpc ClassifyTraffic(ClassifyRequest) returns (ClassifyResponse);
+}
+
+enum RuleAction {
+  RULE_ACTION_ALLOW = 0;
+  RULE_ACTION_BLOCK = 1;
+  RULE_ACTION_LOG_ONLY = 2;
+}
+
+enum RuleDirection {
+  RULE_DIRECTION_INBOUND = 0;
+  RULE_DIRECTION_OUTBOUND = 1;
+  RULE_DIRECTION_BOTH = 2;
+}
+
+message ConnectionInfo {
+  string source_ip = 1;
+  int32 source_port = 2;
+  string dest_ip = 3;
+  int32 dest_port = 4;
+  string protocol = 5;
+  string process_name = 6;
+  int32 process_pid = 7;
+  bytes packet_snippet = 8;
+}
+
+message FirewallRule {
+  string rule_id = 1;
+  RuleAction action = 2;
+  RuleDirection direction = 3;
+  string protocol = 4;
+  string remote_ip = 5;
+  int32 remote_port = 6;
+  string local_port = 7;
+  string application = 8;
+  bool enabled = 9;
+  int32 priority = 10;
+}
+
+message EvaluateRequest {
+  ConnectionInfo connection = 1;
+  repeated FirewallRule rules = 2;
+}
+
+message EvaluateResponse {
+  string matched_rule_id = 1;
+  RuleAction action = 2;
+  bool is_suspicious = 3;
+  string reason = 4;
+}
+
+message CompileRulesRequest {
+  repeated FirewallRule rules = 1;
+}
+
+message CompileRulesResponse {
+  bytes compiled_rules = 1;
+  int32 rule_count = 2;
+}
+
+message ClassifyRequest {
+  ConnectionInfo connection = 1;
+}
+
+message ClassifyResponse {
+  string traffic_type = 1;
+  bool is_encrypted = 2;
+  string application_guess = 3;
+}

@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package nexguard;
+
+enum ThreatType {
+  THREAT_TYPE_UNKNOWN = 0;
+  THREAT_TYPE_VIRUS = 1;
+  THREAT_TYPE_TROJAN = 2;
+  THREAT_TYPE_WORM = 3;
+  THREAT_TYPE_RANSOMWARE = 4;
+  THREAT_TYPE_SPYWARE = 5;
+  THREAT_TYPE_ADWARE = 6;
+  THREAT_TYPE_ROOTKIT = 7;
+  THREAT_TYPE_PUP = 8;
+}
+
+enum ThreatSeverity {
+  THREAT_SEVERITY_UNKNOWN = 0;
+  THREAT_SEVERITY_LOW = 1;
+  THREAT_SEVERITY_MEDIUM = 2;
+  THREAT_SEVERITY_HIGH = 3;
+  THREAT_SEVERITY_CRITICAL = 4;
+}
+
+message ThreatInfo {
+  string threat_name = 1;
+  ThreatType threat_type = 2;
+  ThreatSeverity severity = 3;
+  float confidence = 4;
+  string detection_method = 5;
+  string matched_rule = 6;
+  repeated string iocs = 7;
+}
+
+message SignatureDB {
+  string version = 1;
+  map<string, string> hashes = 2;
+}
+
+message HeuristicConfig {
+  repeated string suspicious_extensions = 1;
+  repeated string suspicious_patterns = 2;
+  repeated string suspicious_domains = 3;
+  float risk_threshold = 4;
+  bool enable_pe_analysis = 5;
+  bool enable_macro_analysis = 6;
+  bool enable_script_analysis = 7;
+}
+
+message ScanOptions {
+  int32 timeout_ms = 1;
+  bool deep_scan = 2;
+  int32 max_recursion_depth = 3;
+}
+
+message ScanMetadata {
+  string scan_id = 1;
+  int64 duration_ms = 2;
+  int64 bytes_scanned = 3;
+}
