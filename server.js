@@ -16,7 +16,7 @@ const { generalLimiter } = require('./middleware/global/rateLimiter');
 const errorHandler = require('./middleware/global/errorHandler');
 const connectDB = require('./config/db');
 const { connectRedis, getRedisClient } = require('./config/redis');
-const { initSocket, getIO } = require('./config/socket');
+const { initSocket } = require('./config/socket');
 const { initSchedulers } = require('./schedulers');
 const logger = require('./utils/logger');
 
@@ -140,7 +140,6 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// HTTP logging — skip in production
 if (!isProduction) {
   app.use(morgan('dev'));
 }
@@ -268,6 +267,12 @@ const start = async () => {
       console.log(``);
     }
     logger.info(`NexGuard Server running on ${serverUrl}`);
+
+    // Start keep-alive for Rust API
+    if (process.env.RUST_API_URL) {
+      require('./keepAlive');
+      logger.info(`KeepAlive started for ${process.env.RUST_API_URL}`);
+    }
   });
 };
 
