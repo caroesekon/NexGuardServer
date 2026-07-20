@@ -2,7 +2,7 @@ const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 const path = require('path');
 
-const PROTO_PATH = path.join(__dirname, '..', '..', 'api', 'proto');
+const PROTO_PATH = path.join(__dirname, '..', 'proto');
 
 const packageDefinition = protoLoader.loadSync(
   [
@@ -25,7 +25,6 @@ const nexguard = grpc.loadPackageDefinition(packageDefinition).nexguard;
 
 const getClient = (service) => {
   const endpoint = process.env.NEXGUARD_GRPC_ENDPOINT || 'localhost:50051';
-
   const ServiceClient = nexguard[service];
   return new ServiceClient(endpoint, grpc.credentials.createInsecure());
 };
