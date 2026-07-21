@@ -130,11 +130,28 @@ const checkAI = async () => {
 };
 
 // ── Security Middleware ──────────────────────────────
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:3001'],
-  credentials: true,
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
 }));
+
+app.use(cors({
+  origin: function (origin, callback) {
+    const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [
+      'http://localhost:3000', 'http://localhost:3001',
+    ];
+    if (!origin || allowedOrigins.includes(origin) ||
+        origin.startsWith('tauri://') || origin.startsWith('https://tauri.localhost')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
 app.use(compression());
 app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
@@ -268,7 +285,6 @@ const start = async () => {
     }
     logger.info(`NexGuard Server running on ${serverUrl}`);
 
-    // Start keep-alive for Rust API
     if (process.env.RUST_API_URL) {
       require('./keepAlive');
       logger.info(`KeepAlive started for ${process.env.RUST_API_URL}`);
